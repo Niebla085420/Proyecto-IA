@@ -1,0 +1,113 @@
+<!--
+  La Carrera Monstruosa — Juego local de obstáculos
+  Copyright (c) 2026 Proyecto personal
+  Uso personal; no distribuido públicamente.
+  Built with dbv-specs-ops · https://github.com/davidbuenov/dbv-specs-ops
+-->
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#193c34">
+    <meta name="description" content="Corre, esquiva obstáculos y supera tu récord monstruoso.">
+    <title>La Carrera Monstruosa</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="game.js" defer></script>
+  </head>
+  <body>
+    <main class="game-shell">
+      <header class="topbar">
+        <a class="brand" href="#inicio" aria-label="La Carrera Monstruosa, inicio">
+          <span class="brand-mark" aria-hidden="true">✦</span>
+          <span>LA CARRERA <strong>MONSTRUOSA</strong></span>
+        </a>
+        <div class="top-record"><span>RÉCORD</span><strong id="topRecord">0 m</strong></div>
+      </header>
+
+      <section class="game-frame" aria-label="Juego La Carrera Monstruosa">
+        <canvas id="gameCanvas" width="960" height="540" tabindex="0" aria-label="Pista de carrera de tres carriles"></canvas>
+
+        <div id="hud" class="hud" hidden>
+          <div class="hud-distance"><span>DISTANCIA</span><strong id="distanceValue">0 <small>m</small></strong></div>
+          <div class="hud-zone"><span id="zoneName">CASTILLO ABANDONADO</span><span id="obstacleHint" class="obstacle-hint">ARMADURAS · BLOQUES · HUECOS</span><span class="zone-marker" aria-hidden="true"></span></div>
+          <div class="hud-power">
+            <span id="powerIcon" class="power-icon" aria-hidden="true">✦</span>
+            <span class="power-copy"><strong id="powerName">Poder</strong><span id="cooldownText">LISTO</span></span>
+            <span class="cooldown-track" aria-hidden="true"><span id="cooldownBar"></span></span>
+          </div>
+          <button id="pauseButton" class="icon-button pause-button" type="button" aria-label="Pausar partida" title="Pausar">Ⅱ</button>
+        </div>
+
+        <section id="menuScreen" class="screen menu-screen" aria-labelledby="mainTitle">
+          <div class="menu-heading">
+            <p class="eyebrow">LA NOCHE ES JOVEN</p>
+            <h1 id="mainTitle">Corre si<br><em>te atreves.</em></h1>
+          </div>
+          <div class="character-picker">
+            <p class="picker-label">ELIGE A TU CORREDOR</p>
+            <div class="character-list" role="group" aria-label="Personajes">
+              <button class="character-choice is-selected" type="button" data-character="witch" aria-pressed="true">
+                <span class="character-symbol witch-symbol" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="m11 20 13-19 13 19-9-3-4 4-5-4z" fill="#283c39"/><path d="M10 19h28v5H10z" fill="#e5a94f"/><path d="M14 29q10-9 20 0v12H14z" fill="#d38a59"/><circle cx="24" cy="28" r="9" fill="#edd5aa"/><path d="M21 28h1m5 0h1" stroke="#293e37" stroke-width="2.5" stroke-linecap="round"/><path d="m36 27 2 4 4 2-4 1-2 4-1-4-4-1 4-2z" fill="#f4d37e"/></svg></span><strong>Bruja</strong><span>Vuelo</span>
+              </button>
+              <button class="character-choice" type="button" data-character="ghost" aria-pressed="false">
+                <span class="character-symbol ghost-symbol" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M8 40V23a16 16 0 0 1 32 0v17l-7-5-6 6-7-6-6 6z" fill="#b9dfd1"/><ellipse cx="18" cy="24" rx="2.5" ry="4" fill="#314943"/><ellipse cx="30" cy="24" rx="2.5" ry="4" fill="#314943"/><path d="M20 32q4 4 8 0" fill="none" stroke="#805c55" stroke-width="2" stroke-linecap="round"/><path d="m11 12-3-4m28 4 3-4" stroke="#f3d17a" stroke-width="2" stroke-linecap="round"/></svg></span><strong>Fantasma</strong><span>Fase</span>
+              </button>
+              <button class="character-choice" type="button" data-character="vampire" aria-pressed="false">
+                <span class="character-symbol vampire-symbol" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M9 13q15-9 30 0l-3 13-2 19-10-7-10 7-2-19z" fill="#a64450"/><circle cx="24" cy="21" r="11" fill="#e7bd96"/><path d="M13 19q11-14 22 0l-3-12H16z" fill="#293d3a"/><path d="M20 22h1m7 0h1" stroke="#293d3a" stroke-width="2.5" stroke-linecap="round"/><path d="m20 29 3 5 1-5 2 5 3-5" fill="#fff0da"/></svg></span><strong>Vampiro</strong><span>Escudo</span>
+              </button>
+              <button class="character-choice" type="button" data-character="werewolf" aria-pressed="false">
+                <span class="character-symbol wolf-symbol" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="m10 19-4-16 16 10m16 6 4-16-16 10" fill="#899960"/><path d="M9 26q0-16 15-16t15 16v8l-8 9H17l-8-9z" fill="#b9bd83"/><path d="M16 25h4m8 0h4" stroke="#293b34" stroke-width="3" stroke-linecap="round"/><path d="m18 32 6-3 6 3-6 5z" fill="#e9d7b4"/><path d="m16 34 4 7m12-7-4 7" stroke="#efe5ce" stroke-width="2"/></svg></span><strong>Hombre lobo</strong><span>Salto largo</span>
+              </button>
+              <button class="character-choice" type="button" data-character="skeleton" aria-pressed="false">
+                <span class="character-symbol bone-symbol" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M12 8q4-5 9 0h6q5-5 9 0 5 5 0 10v11q5 5 0 10-4 5-9 0h-6q-5 5-9 0-5-5 0-10V18q-5-5 0-10z" fill="#eadfc5"/><circle cx="18" cy="19" r="3" fill="#30413b"/><circle cx="30" cy="19" r="3" fill="#30413b"/><path d="m21 25 3-3 3 3-3 4z" fill="#bf7559"/><path d="M18 32h12m-10 0v4m5-4v4m5-4v4" stroke="#746e5d" stroke-width="2" stroke-linecap="round"/></svg></span><strong>Esqueleto</strong><span>Bumerán</span>
+              </button>
+            </div>
+            <div class="menu-actions">
+              <p id="selectedPower" class="selected-power">La escoba te mantiene en el aire un instante.</p>
+              <button id="startButton" class="primary-button" type="button">Empezar carrera <span aria-hidden="true">↗</span></button>
+            </div>
+          </div>
+          <p class="menu-record">TU MEJOR DISTANCIA <strong id="menuRecord">0 m</strong></p>
+        </section>
+
+        <section id="pauseScreen" class="screen result-screen" aria-labelledby="pauseTitle" hidden>
+          <p class="eyebrow">RESPIRA UN MOMENTO</p>
+          <h2 id="pauseTitle">En pausa</h2>
+          <button id="resumeButton" class="primary-button" type="button">Seguir corriendo <span aria-hidden="true">↗</span></button>
+        </section>
+
+        <section id="resultScreen" class="screen result-screen" aria-labelledby="resultTitle" hidden>
+          <p class="eyebrow" id="resultEyebrow">FIN DE LA CARRERA</p>
+          <h2 id="resultTitle">¡Casi lo logras!</h2>
+          <p id="resultDistance" class="result-distance">0 <small>m</small></p>
+          <p id="newRecord" class="new-record" hidden>✦ NUEVO RÉCORD ✦</p>
+          <p class="best-distance">TU MEJOR DISTANCIA <strong id="resultRecord">0 m</strong></p>
+          <div class="result-actions">
+            <button id="retryButton" class="primary-button" type="button">Intentar de nuevo <span aria-hidden="true">↗</span></button>
+            <button id="changeCharacterButton" class="quiet-button" type="button">Cambiar monstruo</button>
+          </div>
+        </section>
+      </section>
+
+      <nav id="touchControls" class="touch-controls" aria-label="Controles de carrera" hidden>
+        <div class="lane-controls" aria-label="Cambiar de carril">
+          <button id="leftButton" class="touch-button lane-button" type="button" aria-label="Carril izquierdo">←</button>
+          <button id="rightButton" class="touch-button lane-button" type="button" aria-label="Carril derecho">→</button>
+        </div>
+        <div class="action-controls">
+          <button id="jumpButton" class="touch-button jump-button" type="button" aria-label="Saltar">↑</button>
+          <button id="skillButton" class="touch-button skill-button" type="button" aria-label="Activar habilidad">✦</button>
+        </div>
+      </nav>
+
+      <footer class="bottomline">
+        <span>CASTILLO <i>·</i> BOSQUE <i>·</i> CEMENTERIO</span>
+        <span class="desktop-hint">← → / A D CARRIL <b>·</b> W / ESPACIO SALTA <b>·</b> F / X PODER</span>
+        <span class="mobile-hint">DESLIZA PARA CAMBIAR DE CARRIL</span>
+      </footer>
+      <p id="storageNotice" class="storage-notice" role="status" hidden></p>
+      <p id="gameAnnouncement" class="visually-hidden" role="status" aria-live="polite"></p>
+    </main>
+  </body>
+</html>
